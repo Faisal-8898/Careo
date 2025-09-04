@@ -219,12 +219,12 @@ BEGIN
         -- Old values
         old_first_name, old_last_name, old_specialization_id, old_department_id,
         old_license_number, old_medical_degree, old_university, old_graduation_year,
-        old_experience_years, old_contact_phone,
+        old_experience_years, old_contact_phone, old_email, old_password_hash, old_last_login_date,
         old_availability_schedule, old_status,
         -- New values
         new_first_name, new_last_name, new_specialization_id, new_department_id,
         new_license_number, new_medical_degree, new_university, new_graduation_year,
-        new_experience_years, new_contact_phone,
+        new_experience_years, new_contact_phone, new_email, new_password_hash, new_last_login_date,
         new_availability_schedule, new_status,
         source_system, data_lineage, transformation_notes
     ) VALUES (
@@ -234,12 +234,12 @@ BEGIN
         -- Old values
         :OLD.first_name, :OLD.last_name, :OLD.specialization_id, :OLD.department_id,
         :OLD.license_number, :OLD.medical_degree, :OLD.university, :OLD.graduation_year,
-        :OLD.experience_years, :OLD.contact_phone,
+        :OLD.experience_years, :OLD.contact_phone, :OLD.email, :OLD.password_hash, :OLD.last_login_date,
         :OLD.availability_schedule, :OLD.status,
         -- New values
         :NEW.first_name, :NEW.last_name, :NEW.specialization_id, :NEW.department_id,
         :NEW.license_number, :NEW.medical_degree, :NEW.university, :NEW.graduation_year,
-        :NEW.experience_years, :NEW.contact_phone,
+        :NEW.experience_years, :NEW.contact_phone, :NEW.email, :NEW.password_hash, :NEW.last_login_date,
         :NEW.availability_schedule, :NEW.status,
         'HEALTHCARE_SYSTEM', 'DIRECT_USER_INPUT', 'Automatic audit logging via trigger'
     );
@@ -432,11 +432,11 @@ BEGIN
         -- Old values
         old_first_name, old_last_name, old_department_id, old_license_number,
         old_nursing_degree, old_university, old_graduation_year, old_experience_years,
-        old_contact_phone, old_shift_preference, old_availability_schedule, old_status,
+        old_contact_phone, old_email, old_password_hash, old_last_login_date, old_shift_preference, old_availability_schedule, old_status,
         -- New values
         new_first_name, new_last_name, new_department_id, new_license_number,
         new_nursing_degree, new_university, new_graduation_year, new_experience_years,
-        new_contact_phone, new_shift_preference, new_availability_schedule, new_status,
+        new_contact_phone, new_email, new_password_hash, new_last_login_date, new_shift_preference, new_availability_schedule, new_status,
         source_system, data_lineage, transformation_notes
     ) VALUES (
         v_audit_id, COALESCE(:NEW.nurse_id, :OLD.nurse_id), v_operation_type,
@@ -445,11 +445,11 @@ BEGIN
         -- Old values
         :OLD.first_name, :OLD.last_name, :OLD.department_id, :OLD.license_number,
         :OLD.nursing_degree, :OLD.university, :OLD.graduation_year, :OLD.experience_years,
-        :OLD.contact_phone, :OLD.shift_preference, :OLD.availability_schedule, :OLD.status,
+        :OLD.contact_phone, :OLD.email, :OLD.password_hash, :OLD.last_login_date, :OLD.shift_preference, :OLD.availability_schedule, :OLD.status,
         -- New values
         :NEW.first_name, :NEW.last_name, :NEW.department_id, :NEW.license_number,
         :NEW.nursing_degree, :NEW.university, :NEW.graduation_year, :NEW.experience_years,
-        :NEW.contact_phone, :NEW.shift_preference, :NEW.availability_schedule, :NEW.status,
+        :NEW.contact_phone, :NEW.email, :NEW.password_hash, :NEW.last_login_date, :NEW.shift_preference, :NEW.availability_schedule, :NEW.status,
         'HEALTHCARE_SYSTEM', 'DIRECT_USER_INPUT', 'Automatic audit logging via trigger'
     );
     
@@ -538,10 +538,10 @@ BEGIN
         session_id, ip_address, application_name, affected_fields, change_summary,
         -- Old values
         old_first_name, old_last_name, old_department_id, old_employee_id,
-        old_contact_phone, old_access_level, old_status,
+        old_contact_phone, old_email, old_password_hash, old_last_login_date, old_access_level, old_status,
         -- New values
         new_first_name, new_last_name, new_department_id, new_employee_id,
-        new_contact_phone, new_access_level, new_status,
+        new_contact_phone, new_email, new_password_hash, new_last_login_date, new_access_level, new_status,
         source_system, data_lineage, transformation_notes
     ) VALUES (
         v_audit_id, COALESCE(:NEW.admin_id, :OLD.admin_id), v_operation_type,
@@ -549,10 +549,10 @@ BEGIN
         v_affected_fields, v_change_summary,
         -- Old values
         :OLD.first_name, :OLD.last_name, :OLD.department_id, :OLD.employee_id,
-        :OLD.contact_phone, :OLD.access_level, :OLD.status,
+        :OLD.contact_phone, :OLD.email, :OLD.password_hash, :OLD.last_login_date, :OLD.access_level, :OLD.status,
         -- New values
         :NEW.first_name, :NEW.last_name, :NEW.department_id, :NEW.employee_id,
-        :NEW.contact_phone, :NEW.access_level, :NEW.status,
+        :NEW.contact_phone, :NEW.email, :NEW.password_hash, :NEW.last_login_date, :NEW.access_level, :NEW.status,
         'HEALTHCARE_SYSTEM', 'DIRECT_USER_INPUT', 'Automatic audit logging via trigger'
     );
     
