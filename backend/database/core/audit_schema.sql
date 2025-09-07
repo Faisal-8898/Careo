@@ -11,10 +11,8 @@ DROP TABLE audit_patients CASCADE CONSTRAINTS;
 DROP TABLE audit_doctors CASCADE CONSTRAINTS;
 DROP TABLE audit_nurses CASCADE CONSTRAINTS;
 DROP TABLE audit_admins CASCADE CONSTRAINTS;
-DROP TABLE audit_medications CASCADE CONSTRAINTS;
 DROP TABLE audit_medical_records CASCADE CONSTRAINTS;
 DROP TABLE audit_prescriptions CASCADE CONSTRAINTS;
-DROP TABLE audit_lab_results CASCADE CONSTRAINTS;
 DROP TABLE audit_appointments CASCADE CONSTRAINTS;
 DROP TABLE audit_specializations CASCADE CONSTRAINTS;
 DROP TABLE audit_departments CASCADE CONSTRAINTS;
@@ -119,17 +117,14 @@ CREATE TABLE audit_doctors (
     old_last_name VARCHAR2(50),
     old_specialization_id NUMBER(5),
     old_department_id NUMBER(5),
-    old_license_number VARCHAR2(50),
     old_medical_degree VARCHAR2(100),
     old_university VARCHAR2(100),
-    old_graduation_year NUMBER(4),
     old_experience_years NUMBER(3),
     old_contact_phone VARCHAR2(20),
     -- Login credentials (old values)
     old_email VARCHAR2(100),
     old_password_hash VARCHAR2(255),
     old_last_login_date DATE,
-    old_availability_schedule VARCHAR2(500),
     old_status VARCHAR2(20),
     
     -- Data after change
@@ -137,17 +132,14 @@ CREATE TABLE audit_doctors (
     new_last_name VARCHAR2(50),
     new_specialization_id NUMBER(5),
     new_department_id NUMBER(5),
-    new_license_number VARCHAR2(50),
     new_medical_degree VARCHAR2(100),
     new_university VARCHAR2(100),
-    new_graduation_year NUMBER(4),
     new_experience_years NUMBER(3),
     new_contact_phone VARCHAR2(20),
     -- Login credentials (new values)
     new_email VARCHAR2(100),
     new_password_hash VARCHAR2(255),
     new_last_login_date DATE,
-    new_availability_schedule VARCHAR2(500),
     new_status VARCHAR2(20),
     
     -- Change metadata
@@ -169,65 +161,6 @@ CREATE TABLE audit_doctors (
     created_date DATE DEFAULT SYSDATE NOT NULL
 );
 
--- Audit table for Medications - tracks all changes to medication data
-CREATE TABLE audit_medications (
-    audit_id NUMBER(20) PRIMARY KEY,
-    medication_id NUMBER(10) NOT NULL,
-    operation_type VARCHAR2(10) NOT NULL CHECK (operation_type IN ('INSERT', 'UPDATE', 'DELETE')),
-    operation_timestamp TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
-    user_id VARCHAR2(50) NOT NULL,
-    session_id VARCHAR2(50),
-    ip_address VARCHAR2(45),
-    application_name VARCHAR2(100),
-    
-    -- Data before change
-    old_generic_name VARCHAR2(100),
-    old_brand_name VARCHAR2(100),
-    old_dosage_form VARCHAR2(50),
-    old_strength VARCHAR2(50),
-    old_unit VARCHAR2(20),
-    old_manufacturer VARCHAR2(100),
-    old_description CLOB,
-    old_contraindications CLOB,
-    old_side_effects CLOB,
-    old_storage_instructions VARCHAR2(500),
-    old_prescription_required CHAR(1),
-    old_controlled_substance CHAR(1),
-    old_status VARCHAR2(20),
-    
-    -- Data after change
-    new_generic_name VARCHAR2(100),
-    new_brand_name VARCHAR2(100),
-    new_dosage_form VARCHAR2(50),
-    new_strength VARCHAR2(50),
-    new_unit VARCHAR2(20),
-    new_manufacturer VARCHAR2(100),
-    new_description CLOB,
-    new_contraindications CLOB,
-    new_side_effects CLOB,
-    new_storage_instructions VARCHAR2(500),
-    new_prescription_required CHAR(1),
-    new_controlled_substance CHAR(1),
-    new_status VARCHAR2(20),
-    
-    -- Change metadata
-    change_reason VARCHAR2(500),
-    change_justification VARCHAR2(1000),
-    affected_fields CLOB,
-    change_summary VARCHAR2(1000),
-    
-    -- Provenance information
-    source_system VARCHAR2(100),
-    data_lineage VARCHAR2(500),
-    transformation_notes VARCHAR2(1000),
-    
-    -- Compliance fields
-    compliance_level VARCHAR2(50) DEFAULT 'STANDARD',
-    retention_period_years NUMBER(3) DEFAULT 7,
-    legal_hold CHAR(1) DEFAULT 'N' CHECK (legal_hold IN ('Y', 'N')),
-    
-    created_date DATE DEFAULT SYSDATE NOT NULL
-);
 
 -- =====================================================
 -- NURSES TABLE AUDIT TABLE
@@ -248,9 +181,7 @@ CREATE TABLE audit_nurses (
     old_first_name VARCHAR2(50),
     old_last_name VARCHAR2(50),
     old_department_id NUMBER(5),
-    old_license_number VARCHAR2(50),
     old_nursing_degree VARCHAR2(100),
-    old_university VARCHAR2(100),
     old_graduation_year NUMBER(4),
     old_experience_years NUMBER(3),
     old_contact_phone VARCHAR2(20),
@@ -259,16 +190,13 @@ CREATE TABLE audit_nurses (
     old_password_hash VARCHAR2(255),
     old_last_login_date DATE,
     old_shift_preference VARCHAR2(50),
-    old_availability_schedule VARCHAR2(500),
     old_status VARCHAR2(20),
     
     -- Data after change
     new_first_name VARCHAR2(50),
     new_last_name VARCHAR2(50),
     new_department_id NUMBER(5),
-    new_license_number VARCHAR2(50),
     new_nursing_degree VARCHAR2(100),
-    new_university VARCHAR2(100),
     new_graduation_year NUMBER(4),
     new_experience_years NUMBER(3),
     new_contact_phone VARCHAR2(20),
@@ -277,7 +205,6 @@ CREATE TABLE audit_nurses (
     new_password_hash VARCHAR2(255),
     new_last_login_date DATE,
     new_shift_preference VARCHAR2(50),
-    new_availability_schedule VARCHAR2(500),
     new_status VARCHAR2(20),
     
     -- Change metadata
@@ -373,6 +300,8 @@ CREATE TABLE audit_medical_records (
     -- Data before change
     old_patient_id NUMBER(10),
     old_doctor_id NUMBER(10),
+    old_nurse_id NUMBER(10),
+    old_nurse_task VARCHAR2(500),
     old_visit_date DATE,
     old_record_type VARCHAR2(50),
     old_chief_complaint VARCHAR2(500),
@@ -381,6 +310,8 @@ CREATE TABLE audit_medical_records (
     old_diagnosis CLOB,
     old_treatment_plan CLOB,
     old_recommendations CLOB,
+    old_critical_status VARCHAR2(20),
+    old_critical_notes VARCHAR2(500),
     old_follow_up_date DATE,
     old_follow_up_notes VARCHAR2(500),
     old_record_status VARCHAR2(20),
@@ -388,6 +319,8 @@ CREATE TABLE audit_medical_records (
     -- Data after change
     new_patient_id NUMBER(10),
     new_doctor_id NUMBER(10),
+    new_nurse_id NUMBER(10),
+    new_nurse_task VARCHAR2(500),
     new_visit_date DATE,
     new_record_type VARCHAR2(50),
     new_chief_complaint VARCHAR2(500),
@@ -396,6 +329,8 @@ CREATE TABLE audit_medical_records (
     new_diagnosis CLOB,
     new_treatment_plan CLOB,
     new_recommendations CLOB,
+    new_critical_status VARCHAR2(20),
+    new_critical_notes VARCHAR2(500),
     new_follow_up_date DATE,
     new_follow_up_notes VARCHAR2(500),
     new_record_status VARCHAR2(20),
@@ -432,30 +367,22 @@ CREATE TABLE audit_prescriptions (
     
     -- Data before change
     old_record_id NUMBER(15),
-    old_medication_id NUMBER(10),
+    old_medicine_name VARCHAR2(100),
     old_dosage VARCHAR2(50),
     old_frequency VARCHAR2(100),
     old_duration VARCHAR2(100),
     old_instructions VARCHAR2(500),
-    old_quantity_prescribed NUMBER(5),
-    old_refills_allowed NUMBER(2),
-    old_refills_remaining NUMBER(2),
     old_prescription_date DATE,
-    old_expiry_date DATE,
     old_status VARCHAR2(20),
     
     -- Data after change
     new_record_id NUMBER(15),
-    new_medication_id NUMBER(10),
+    new_medicine_name VARCHAR2(100),
     new_dosage VARCHAR2(50),
     new_frequency VARCHAR2(100),
     new_duration VARCHAR2(100),
     new_instructions VARCHAR2(500),
-    new_quantity_prescribed NUMBER(5),
-    new_refills_allowed NUMBER(2),
-    new_refills_remaining NUMBER(2),
     new_prescription_date DATE,
-    new_expiry_date DATE,
     new_status VARCHAR2(20),
     
     -- Change metadata
@@ -477,61 +404,6 @@ CREATE TABLE audit_prescriptions (
     created_date DATE DEFAULT SYSDATE NOT NULL
 );
 
--- Audit table for Lab Results - tracks all changes to lab results
-CREATE TABLE audit_lab_results (
-    audit_id NUMBER(20) PRIMARY KEY,
-    lab_id NUMBER(15) NOT NULL,
-    operation_type VARCHAR2(10) NOT NULL CHECK (operation_type IN ('INSERT', 'UPDATE', 'DELETE')),
-    operation_timestamp TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
-    user_id VARCHAR2(50) NOT NULL,
-    session_id VARCHAR2(50),
-    ip_address VARCHAR2(45),
-    application_name VARCHAR2(100),
-    
-    -- Data before change
-    old_patient_id NUMBER(10),
-    old_doctor_id NUMBER(10),
-    old_test_type VARCHAR2(100),
-    old_test_date DATE,
-    old_results CLOB,
-    old_normal_range VARCHAR2(200),
-    old_units VARCHAR2(50),
-    old_interpretation VARCHAR2(500),
-    old_lab_technician VARCHAR2(100),
-    old_lab_facility VARCHAR2(100),
-    old_status VARCHAR2(20),
-    
-    -- Data after change
-    new_patient_id NUMBER(10),
-    new_doctor_id NUMBER(10),
-    new_test_type VARCHAR2(100),
-    new_test_date DATE,
-    new_results CLOB,
-    new_normal_range VARCHAR2(200),
-    new_units VARCHAR2(50),
-    new_interpretation VARCHAR2(500),
-    new_lab_technician VARCHAR2(100),
-    new_lab_facility VARCHAR2(100),
-    new_status VARCHAR2(20),
-    
-    -- Change metadata
-    change_reason VARCHAR2(500),
-    change_justification VARCHAR2(1000),
-    affected_fields CLOB,
-    change_summary VARCHAR2(1000),
-    
-    -- Provenance information
-    source_system VARCHAR2(100),
-    data_lineage VARCHAR2(500),
-    transformation_notes VARCHAR2(1000),
-    
-    -- Compliance fields
-    compliance_level VARCHAR2(50) DEFAULT 'HIGH',
-    retention_period_years NUMBER(3) DEFAULT 10,
-    legal_hold CHAR(1) DEFAULT 'N' CHECK (legal_hold IN ('Y', 'N')),
-    
-    created_date DATE DEFAULT SYSDATE NOT NULL
-);
 
 -- Audit table for Appointments - tracks all changes to appointments
 CREATE TABLE audit_appointments (
@@ -639,12 +511,10 @@ CREATE TABLE audit_departments (
     -- Data before change
     old_department_name VARCHAR2(100),
     old_location VARCHAR2(100),
-    old_head_doctor_id NUMBER(10),
     
     -- Data after change
     new_department_name VARCHAR2(100),
     new_location VARCHAR2(100),
-    new_head_doctor_id NUMBER(10),
     
     -- Change metadata
     change_reason VARCHAR2(500),
@@ -770,19 +640,12 @@ CREATE INDEX idx_audit_admins_admin_id ON audit_admins(admin_id);
 CREATE INDEX idx_audit_admins_timestamp ON audit_admins(operation_timestamp);
 CREATE INDEX idx_audit_admins_user ON audit_admins(user_id);
 
-CREATE INDEX idx_audit_medications_medication_id ON audit_medications(medication_id);
-CREATE INDEX idx_audit_medications_timestamp ON audit_medications(operation_timestamp);
-CREATE INDEX idx_audit_medications_user ON audit_medications(user_id);
-
 CREATE INDEX idx_audit_records_record_id ON audit_medical_records(record_id);
 CREATE INDEX idx_audit_records_timestamp ON audit_medical_records(operation_timestamp);
 CREATE INDEX idx_audit_records_user ON audit_medical_records(user_id);
 
 CREATE INDEX idx_audit_prescriptions_prescription_id ON audit_prescriptions(prescription_id);
 CREATE INDEX idx_audit_prescriptions_timestamp ON audit_prescriptions(operation_timestamp);
-
-CREATE INDEX idx_audit_lab_lab_id ON audit_lab_results(lab_id);
-CREATE INDEX idx_audit_lab_timestamp ON audit_lab_results(operation_timestamp);
 
 CREATE INDEX idx_audit_appointments_appointment_id ON audit_appointments(appointment_id);
 CREATE INDEX idx_audit_appointments_timestamp ON audit_appointments(operation_timestamp);
@@ -809,10 +672,8 @@ COMMENT ON TABLE audit_patients IS 'Complete audit trail for all patient data ch
 COMMENT ON TABLE audit_doctors IS 'Complete audit trail for all doctor data changes';
 COMMENT ON TABLE audit_nurses IS 'Complete audit trail for all nurse data changes';
 COMMENT ON TABLE audit_admins IS 'Complete audit trail for all admin data changes';
-COMMENT ON TABLE audit_medications IS 'Complete audit trail for all medication data changes';
 COMMENT ON TABLE audit_medical_records IS 'Complete audit trail for all medical record changes';
 COMMENT ON TABLE audit_prescriptions IS 'Complete audit trail for all prescription changes';
-COMMENT ON TABLE audit_lab_results IS 'Complete audit trail for all lab result changes';
 COMMENT ON TABLE audit_appointments IS 'Complete audit trail for all appointment changes';
 COMMENT ON TABLE audit_specializations IS 'Complete audit trail for all specialization changes';
 COMMENT ON TABLE audit_departments IS 'Complete audit trail for all department changes';

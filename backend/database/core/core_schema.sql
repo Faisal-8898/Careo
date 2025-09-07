@@ -38,7 +38,6 @@ CREATE TABLE departments (
     department_id NUMBER(5) PRIMARY KEY,
     department_name VARCHAR2(100) NOT NULL UNIQUE,
     location VARCHAR2(100),
-    head_doctor_id NUMBER(10),
     created_date DATE DEFAULT SYSDATE NOT NULL,
     created_by VARCHAR2(50) DEFAULT USER NOT NULL,
     modified_date DATE,
@@ -92,11 +91,10 @@ CREATE TABLE doctors (
     university VARCHAR2(100),
     experience_years NUMBER(3),
     contact_phone VARCHAR2(20),
-    -- Login credentials (email replaces contact_email)
+    -- Login credentials
     email VARCHAR2(100) UNIQUE NOT NULL,
     password_hash VARCHAR2(255) NOT NULL,
     last_login_date DATE,
-    availability_schedule VARCHAR2(500),
     status VARCHAR2(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED')),
     created_date DATE DEFAULT SYSDATE NOT NULL,
     created_by VARCHAR2(50) DEFAULT USER NOT NULL,
@@ -112,18 +110,15 @@ CREATE TABLE nurses (
     first_name VARCHAR2(50) NOT NULL,
     last_name VARCHAR2(50) NOT NULL,
     department_id NUMBER(5),
-    license_number VARCHAR2(50) UNIQUE NOT NULL,
     nursing_degree VARCHAR2(100),
-    university VARCHAR2(100),
     graduation_year NUMBER(4),
     experience_years NUMBER(3),
     contact_phone VARCHAR2(20),
-    -- Login credentials (email replaces contact_email)
+    -- Login credentials
     email VARCHAR2(100) UNIQUE NOT NULL,
     password_hash VARCHAR2(255) NOT NULL,
     last_login_date DATE,
     shift_preference VARCHAR2(50) CHECK (shift_preference IN ('DAY', 'NIGHT', 'ROTATING', 'FLEXIBLE')),
-    availability_schedule VARCHAR2(500),
     status VARCHAR2(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED')),
     created_date DATE DEFAULT SYSDATE NOT NULL,
     created_by VARCHAR2(50) DEFAULT USER NOT NULL,
@@ -140,7 +135,7 @@ CREATE TABLE admins (
     department_id NUMBER(5),
     employee_id VARCHAR2(50) UNIQUE NOT NULL,
     contact_phone VARCHAR2(20),
-    -- Login credentials (email replaces contact_email)
+    -- Login credentials
     email VARCHAR2(100) UNIQUE NOT NULL,
     password_hash VARCHAR2(255) NOT NULL,
     last_login_date DATE,
@@ -163,6 +158,8 @@ CREATE TABLE medical_records (
     record_id NUMBER(15) PRIMARY KEY,
     patient_id NUMBER(10) NOT NULL,
     doctor_id NUMBER(10) NOT NULL,
+    nurse_id NUMBER(10),
+    nurse_task VARCHAR2(500),
     visit_date DATE NOT NULL,
     record_type VARCHAR2(50) CHECK (record_type IN ('CONSULTATION', 'EMERGENCY', 'FOLLOW_UP', 'SURGERY', 'LAB_TEST')),
     chief_complaint VARCHAR2(500),
@@ -171,6 +168,8 @@ CREATE TABLE medical_records (
     diagnosis CLOB,
     treatment_plan CLOB,
     recommendations CLOB,
+    critical_status VARCHAR2(20) CHECK (critical_status IN ('NORMAL', 'ATTENTION', 'CRITICAL')),
+    critical_notes VARCHAR2(500),
     follow_up_date DATE,
     follow_up_notes VARCHAR2(500),
     record_status VARCHAR2(20) DEFAULT 'ACTIVE' CHECK (record_status IN ('ACTIVE', 'ARCHIVED', 'DELETED')),
@@ -179,7 +178,8 @@ CREATE TABLE medical_records (
     modified_date DATE,
     modified_by VARCHAR2(50),
     CONSTRAINT fk_record_patient FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
-    CONSTRAINT fk_record_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+    CONSTRAINT fk_record_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id),
+    CONSTRAINT fk_record_nurse FOREIGN KEY (nurse_id) REFERENCES nurses(nurse_id)
 );
 
 -- Prescriptions table - prescriptions
@@ -191,15 +191,13 @@ CREATE TABLE prescriptions (
     frequency VARCHAR2(100) NOT NULL,
     duration VARCHAR2(100),
     instructions VARCHAR2(500),
-    quantity_prescribed NUMBER(5),
     prescription_date DATE DEFAULT SYSDATE NOT NULL,
-    expiry_date DATE,
     status VARCHAR2(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'FILLED', 'EXPIRED', 'CANCELLED')),
     created_date DATE DEFAULT SYSDATE NOT NULL,
     created_by VARCHAR2(50) DEFAULT USER NOT NULL,
     modified_date DATE,
     modified_by VARCHAR2(50),
-    CONSTRAINT fk_prescription_record FOREIGN KEY (record_id) REFERENCES medical_records(record_id),
+    CONSTRAINT fk_prescription_record FOREIGN KEY (record_id) REFERENCES medical_records(record_id)
 );
 
 
@@ -211,7 +209,6 @@ CREATE TABLE appointments (
     doctor_id NUMBER(10) NOT NULL,
     appointment_date DATE NOT NULL,
     appointment_time TIMESTAMP NOT NULL,
-    -- duration_minutes NUMBER(3) DEFAULT 30,
     appointment_type VARCHAR2(50) CHECK (appointment_type IN ('CONSULTATION', 'FOLLOW_UP', 'EMERGENCY', 'SURGERY', 'LAB_TEST')),
     reason VARCHAR2(500),
     notes VARCHAR2(500),
@@ -252,14 +249,12 @@ CREATE INDEX idx_patients_login ON patients(email, status);
 -- Doctor indexes
 CREATE INDEX idx_doctors_name ON doctors(last_name, first_name);
 CREATE INDEX idx_doctors_specialization ON doctors(specialization_id);
-CREATE INDEX idx_doctors_license ON doctors(license_number);
 CREATE INDEX idx_doctors_email ON doctors(email);
 CREATE INDEX idx_doctors_login ON doctors(email, status);
 
 -- Nurse indexes
 CREATE INDEX idx_nurses_name ON nurses(last_name, first_name);
 CREATE INDEX idx_nurses_department ON nurses(department_id);
-CREATE INDEX idx_nurses_license ON nurses(license_number);
 CREATE INDEX idx_nurses_shift ON nurses(shift_preference);
 CREATE INDEX idx_nurses_email ON nurses(email);
 CREATE INDEX idx_nurses_login ON nurses(email, status);
@@ -274,6 +269,7 @@ CREATE INDEX idx_admins_login ON admins(email, status);
 -- Medical record indexes
 CREATE INDEX idx_records_patient_date ON medical_records(patient_id, visit_date);
 CREATE INDEX idx_records_doctor_date ON medical_records(doctor_id, visit_date);
+CREATE INDEX idx_records_nurse ON medical_records(nurse_id);
 CREATE INDEX idx_records_type ON medical_records(record_type);
 
 -- Prescription indexes
@@ -294,8 +290,8 @@ COMMENT ON TABLE patients IS 'Core patient information and demographics with log
 COMMENT ON TABLE doctors IS 'Healthcare providers with specializations, credentials and login access';
 COMMENT ON TABLE nurses IS 'Nursing staff with department assignments, credentials and login access';
 COMMENT ON TABLE admins IS 'Administrative staff with role-based access control and login credentials';
-COMMENT ON TABLE medical_records IS 'Patient visit records and medical documentation';
-COMMENT ON TABLE prescriptions IS 'Prescriptions linked to medical records';
+COMMENT ON TABLE medical_records IS 'Patient visit records and medical documentation with optional nurse assignment';
+COMMENT ON TABLE prescriptions IS 'Text-based prescriptions linked to medical records';
 COMMENT ON TABLE appointments IS 'Patient appointment scheduling and management';
 COMMENT ON TABLE specializations IS 'Medical specialties and subspecialties';
 COMMENT ON TABLE departments IS 'Hospital departments and organizational structure';

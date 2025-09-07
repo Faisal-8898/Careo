@@ -33,7 +33,7 @@ ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS.FF';
 -- Verify all tables were created successfully
 SELECT table_name, tablespace_name, num_rows, last_analyzed
 FROM user_tables 
-WHERE table_name LIKE '%AUDIT%' OR table_name IN ('PATIENTS', 'DOCTORS', 'MEDICATIONS', 'MEDICAL_RECORDS', 'PRESCRIPTIONS', 'LAB_RESULTS', 'APPOINTMENTS', 'SPECIALIZATIONS', 'DEPARTMENTS')
+WHERE table_name LIKE '%AUDIT%' OR table_name IN ('PATIENTS', 'DOCTORS', 'NURSES', 'ADMINS', 'MEDICAL_RECORDS', 'PRESCRIPTIONS', 'APPOINTMENTS', 'SPECIALIZATIONS', 'DEPARTMENTS')
 ORDER BY table_name;
 
 -- Verify all sequences were created
@@ -44,7 +44,7 @@ ORDER BY sequence_name;
 -- Verify all indexes were created
 SELECT index_name, table_name, uniqueness, status
 FROM user_indexes
-WHERE table_name LIKE '%AUDIT%' OR table_name IN ('PATIENTS', 'DOCTORS', 'MEDICATIONS', 'MEDICAL_RECORDS', 'PRESCRIPTIONS', 'LAB_RESULTS', 'APPOINTMENTS', 'SPECIALIZATIONS', 'DEPARTMENTS')
+WHERE table_name LIKE '%AUDIT%' OR table_name IN ('PATIENTS', 'DOCTORS', 'NURSES', 'ADMINS', 'MEDICAL_RECORDS', 'PRESCRIPTIONS', 'APPOINTMENTS', 'SPECIALIZATIONS', 'DEPARTMENTS')
 ORDER BY table_name, index_name;
 
 -- =====================================================
@@ -59,10 +59,8 @@ CORE TABLES CREATED:
 - doctors: Healthcare providers with login credentials
 - nurses: Nursing staff with login credentials
 - admins: Administrative staff with login credentials
-- medications: Drug information
-- medical_records: Patient visit records
-- prescriptions: Medication prescriptions
-- lab_results: Laboratory test results
+- medical_records: Patient visit records with nurse assignment, tasks, and critical status tracking
+- prescriptions: Text-based medication prescriptions
 - appointments: Patient appointments
 
 AUDIT TABLES CREATED:
@@ -70,17 +68,15 @@ AUDIT TABLES CREATED:
 - audit_doctors: Doctor data change history
 - audit_nurses: Nurse data change history
 - audit_admins: Admin data change history
-- audit_medications: Medication data change history
-- audit_medical_records: Medical record change history
+- audit_medical_records: Medical record change history with nurse task and critical status tracking
 - audit_prescriptions: Prescription change history
-- audit_lab_results: Lab result change history
 - audit_appointments: Appointment change history
 - audit_specializations: Specialization change history
 - audit_departments: Department change history
 - audit_user_actions: System-wide user action history
 - audit_data_access: Data access tracking
 
-TOTAL: 22 tables (11 core + 11 audit)
+TOTAL: 20 tables (9 core + 11 audit)
 
 PROVENANCE FEATURES:
 - Complete data change tracking (INSERT, UPDATE, DELETE)
@@ -107,9 +103,9 @@ PROVENANCE FEATURES:
 PROMPT =====================================================
 PROMPT Healthcare Database Schema Created Successfully!
 PROMPT =====================================================
-PROMPT Core Tables: 11
+PROMPT Core Tables: 9
 PROMPT Audit Tables: 11
-PROMPT Total Tables: 22
+PROMPT Total Tables: 20
 PROMPT =====================================================
 PROMPT Ready for trigger implementation and data insertion
 PROMPT =====================================================
