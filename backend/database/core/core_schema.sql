@@ -9,10 +9,8 @@
 -- Drop existing tables if they exist (for clean setup)
 -- Note: In production, use proper migration scripts
 DROP TABLE prescriptions CASCADE CONSTRAINTS;
-DROP TABLE lab_results CASCADE CONSTRAINTS;
 DROP TABLE appointments CASCADE CONSTRAINTS;
 DROP TABLE medical_records CASCADE CONSTRAINTS;
-DROP TABLE medications CASCADE CONSTRAINTS;
 DROP TABLE doctors CASCADE CONSTRAINTS;
 DROP TABLE nurses CASCADE CONSTRAINTS;
 DROP TABLE admins CASCADE CONSTRAINTS;
@@ -90,10 +88,8 @@ CREATE TABLE doctors (
     last_name VARCHAR2(50) NOT NULL,
     specialization_id NUMBER(5) NOT NULL,
     department_id NUMBER(5),
-    license_number VARCHAR2(50) UNIQUE NOT NULL,
     medical_degree VARCHAR2(100),
     university VARCHAR2(100),
-    graduation_year NUMBER(4),
     experience_years NUMBER(3),
     contact_phone VARCHAR2(20),
     -- Login credentials (email replaces contact_email)
@@ -157,27 +153,6 @@ CREATE TABLE admins (
     CONSTRAINT fk_admins_department FOREIGN KEY (department_id) REFERENCES departments(department_id)
 );
 
--- Medications table - drug information
-CREATE TABLE medications (
-    medication_id NUMBER(10) PRIMARY KEY,
-    generic_name VARCHAR2(100) NOT NULL,
-    brand_name VARCHAR2(100),
-    dosage_form VARCHAR2(50) CHECK (dosage_form IN ('TABLET', 'CAPSULE', 'LIQUID', 'INJECTION', 'CREAM', 'INHALER')),
-    strength VARCHAR2(50),
-    unit VARCHAR2(20),
-    manufacturer VARCHAR2(100),
-    description CLOB,
-    contraindications CLOB,
-    side_effects CLOB,
-    storage_instructions VARCHAR2(500),
-    prescription_required CHAR(1) DEFAULT 'Y' CHECK (prescription_required IN ('Y', 'N')),
-    controlled_substance CHAR(1) DEFAULT 'N' CHECK (controlled_substance IN ('Y', 'N')),
-    status VARCHAR2(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'DISCONTINUED')),
-    created_date DATE DEFAULT SYSDATE NOT NULL,
-    created_by VARCHAR2(50) DEFAULT USER NOT NULL,
-    modified_date DATE,
-    modified_by VARCHAR2(50)
-);
 
 -- =====================================================
 -- 3. TRANSACTION TABLES
@@ -207,18 +182,16 @@ CREATE TABLE medical_records (
     CONSTRAINT fk_record_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
 );
 
--- Prescriptions table - medication prescriptions
+-- Prescriptions table - prescriptions
 CREATE TABLE prescriptions (
     prescription_id NUMBER(15) PRIMARY KEY,
     record_id NUMBER(15) NOT NULL,
-    medication_id NUMBER(10) NOT NULL,
+    medicine_name VARCHAR2(100) NOT NULL,
     dosage VARCHAR2(50) NOT NULL,
     frequency VARCHAR2(100) NOT NULL,
     duration VARCHAR2(100),
     instructions VARCHAR2(500),
     quantity_prescribed NUMBER(5),
-    refills_allowed NUMBER(2) DEFAULT 0,
-    refills_remaining NUMBER(2) DEFAULT 0,
     prescription_date DATE DEFAULT SYSDATE NOT NULL,
     expiry_date DATE,
     status VARCHAR2(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'FILLED', 'EXPIRED', 'CANCELLED')),
@@ -227,30 +200,9 @@ CREATE TABLE prescriptions (
     modified_date DATE,
     modified_by VARCHAR2(50),
     CONSTRAINT fk_prescription_record FOREIGN KEY (record_id) REFERENCES medical_records(record_id),
-    CONSTRAINT fk_prescription_medication FOREIGN KEY (medication_id) REFERENCES medications(medication_id)
 );
 
--- Lab Results table - laboratory test results
-CREATE TABLE lab_results (
-    lab_id NUMBER(15) PRIMARY KEY,
-    patient_id NUMBER(10) NOT NULL,
-    doctor_id NUMBER(10) NOT NULL,
-    test_type VARCHAR2(100) NOT NULL,
-    test_date DATE NOT NULL,
-    results CLOB,
-    normal_range VARCHAR2(200),
-    units VARCHAR2(50),
-    interpretation VARCHAR2(500),
-    lab_technician VARCHAR2(100),
-    lab_facility VARCHAR2(100),
-    status VARCHAR2(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'COMPLETED', 'ABNORMAL', 'CRITICAL')),
-    created_date DATE DEFAULT SYSDATE NOT NULL,
-    created_by VARCHAR2(50) DEFAULT USER NOT NULL,
-    modified_date DATE,
-    modified_by VARCHAR2(50),
-    CONSTRAINT fk_lab_patient FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
-    CONSTRAINT fk_lab_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
-);
+
 
 -- Appointments table - patient appointments
 CREATE TABLE appointments (
@@ -282,10 +234,8 @@ CREATE SEQUENCE seq_patient_id START WITH 10001 INCREMENT BY 1;
 CREATE SEQUENCE seq_doctor_id START WITH 20001 INCREMENT BY 1;
 CREATE SEQUENCE seq_nurse_id START WITH 25001 INCREMENT BY 1;
 CREATE SEQUENCE seq_admin_id START WITH 30001 INCREMENT BY 1;
-CREATE SEQUENCE seq_medication_id START WITH 35001 INCREMENT BY 1;
 CREATE SEQUENCE seq_record_id START WITH 40001 INCREMENT BY 1;
 CREATE SEQUENCE seq_prescription_id START WITH 50001 INCREMENT BY 1;
-CREATE SEQUENCE seq_lab_id START WITH 60001 INCREMENT BY 1;
 CREATE SEQUENCE seq_appointment_id START WITH 70001 INCREMENT BY 1;
 
 -- =====================================================
@@ -328,12 +278,8 @@ CREATE INDEX idx_records_type ON medical_records(record_type);
 
 -- Prescription indexes
 CREATE INDEX idx_prescriptions_patient ON prescriptions(record_id);
-CREATE INDEX idx_prescriptions_medication ON prescriptions(medication_id);
 CREATE INDEX idx_prescriptions_date ON prescriptions(prescription_date);
 
--- Lab result indexes
-CREATE INDEX idx_lab_patient_date ON lab_results(patient_id, test_date);
-CREATE INDEX idx_lab_test_type ON lab_results(test_type);
 
 -- Appointment indexes
 CREATE INDEX idx_appointments_patient ON appointments(patient_id);
@@ -348,10 +294,8 @@ COMMENT ON TABLE patients IS 'Core patient information and demographics with log
 COMMENT ON TABLE doctors IS 'Healthcare providers with specializations, credentials and login access';
 COMMENT ON TABLE nurses IS 'Nursing staff with department assignments, credentials and login access';
 COMMENT ON TABLE admins IS 'Administrative staff with role-based access control and login credentials';
-COMMENT ON TABLE medications IS 'Drug information and specifications';
 COMMENT ON TABLE medical_records IS 'Patient visit records and medical documentation';
-COMMENT ON TABLE prescriptions IS 'Medication prescriptions linked to medical records';
-COMMENT ON TABLE lab_results IS 'Laboratory test results and interpretations';
+COMMENT ON TABLE prescriptions IS 'Prescriptions linked to medical records';
 COMMENT ON TABLE appointments IS 'Patient appointment scheduling and management';
 COMMENT ON TABLE specializations IS 'Medical specialties and subspecialties';
 COMMENT ON TABLE departments IS 'Hospital departments and organizational structure';
