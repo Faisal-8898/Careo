@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"careo-backend/config"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -12,22 +14,47 @@ func main() {
 	// Set Gin to release mode for production-like behavior
 	gin.SetMode(gin.ReleaseMode)
 
+	// Connect to database
+	if err := config.ConnectDB(); err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer config.CloseDB()
+
 	// Create Gin router
 	r := gin.Default()
 
 	// Configure CORS
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000"}
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
-	r.Use(cors.New(config))
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:3000"}
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	r.Use(cors.New(corsConfig))
 
 	// Health check endpoint
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"message": "Careo Backend is running",
-		})
+		// Test database connection
+		if config.DB != nil {
+			if err := config.DB.Ping(); err != nil {
+				c.JSON(http.StatusServiceUnavailable, gin.H{
+					"status":  "error",
+					"message": "Database connection failed",
+					"error":   err.Error(),
+				})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"status":   "ok",
+				"message":  "Careo Backend is running",
+				"database": "connected",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"status":   "ok",
+				"message":  "Careo Backend is running",
+				"database": "mock_mode",
+				"note":     "Database connection not available - running in mock mode",
+			})
+		}
 	})
 
 	// API routes group
