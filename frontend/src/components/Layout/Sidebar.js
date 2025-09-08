@@ -4,33 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../../contexts/AuthContext";
-import {
-  HomeIcon,
-  TrainIcon,
-  MapIcon,
-  CalendarIcon,
-  TicketIcon,
-  CreditCardIcon,
-  ChartBarIcon,
-  UsersIcon,
-  Cog6ToothIcon,
-  DocumentTextIcon,
-  BuildingOffice2Icon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import {
-  HomeIcon as HomeIconSolid,
-  TrainIcon as TrainIconSolid,
-  MapIcon as MapIconSolid,
-  CalendarIcon as CalendarIconSolid,
-  TicketIcon as TicketIconSolid,
-  CreditCardIcon as CreditCardIconSolid,
-  ChartBarIcon as ChartBarIconSolid,
-  UsersIcon as UsersIconSolid,
-  Cog6ToothIcon as Cog6ToothIconSolid,
-  DocumentTextIcon as DocumentTextIconSolid,
-  BuildingOffice2Icon as BuildingOffice2IconSolid,
-} from "@heroicons/react/24/solid";
 import clsx from "clsx";
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -50,26 +23,18 @@ export default function Sidebar({ isOpen, onClose }) {
     {
       name: "Home",
       href: "/",
-      icon: HomeIcon,
-      iconSolid: HomeIconSolid,
     },
     {
       name: "Search Trains",
       href: "/search",
-      icon: TrainIcon,
-      iconSolid: TrainIconSolid,
     },
     {
       name: "Stations",
       href: "/stations",
-      icon: BuildingOffice2Icon,
-      iconSolid: BuildingOffice2IconSolid,
     },
     {
       name: "Routes",
       href: "/routes",
-      icon: MapIcon,
-      iconSolid: MapIconSolid,
     },
   ];
 
@@ -78,26 +43,18 @@ export default function Sidebar({ isOpen, onClose }) {
     {
       name: "Dashboard",
       href: "/dashboard",
-      icon: HomeIcon,
-      iconSolid: HomeIconSolid,
     },
     {
       name: "Search Trains",
       href: "/search",
-      icon: TrainIcon,
-      iconSolid: TrainIconSolid,
     },
     {
       name: "My Bookings",
       href: "/bookings",
-      icon: TicketIcon,
-      iconSolid: TicketIconSolid,
     },
     {
       name: "Payments",
       href: "/payments",
-      icon: CreditCardIcon,
-      iconSolid: CreditCardIconSolid,
     },
   ];
 
@@ -106,13 +63,9 @@ export default function Sidebar({ isOpen, onClose }) {
     {
       name: "Dashboard",
       href: "/admin/dashboard",
-      icon: HomeIcon,
-      iconSolid: HomeIconSolid,
     },
     {
       name: "Management",
-      icon: Cog6ToothIcon,
-      iconSolid: Cog6ToothIconSolid,
       children: [
         { name: "Stations", href: "/admin/stations" },
         { name: "Routes", href: "/admin/routes" },
@@ -123,25 +76,17 @@ export default function Sidebar({ isOpen, onClose }) {
     {
       name: "Bookings",
       href: "/admin/bookings",
-      icon: TicketIcon,
-      iconSolid: TicketIconSolid,
     },
     {
       name: "Payments",
       href: "/admin/payments",
-      icon: CreditCardIcon,
-      iconSolid: CreditCardIconSolid,
     },
     {
       name: "Users",
       href: "/admin/users",
-      icon: UsersIcon,
-      iconSolid: UsersIconSolid,
     },
     {
       name: "Reports",
-      icon: ChartBarIcon,
-      iconSolid: ChartBarIconSolid,
       children: [
         { name: "Booking Reports", href: "/admin/reports/bookings" },
         { name: "Revenue Reports", href: "/admin/reports/revenue" },
@@ -151,8 +96,6 @@ export default function Sidebar({ isOpen, onClose }) {
     {
       name: "Audit Trail",
       href: "/admin/audit",
-      icon: DocumentTextIcon,
-      iconSolid: DocumentTextIconSolid,
     },
   ];
 
@@ -189,18 +132,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
             )}
           >
-            <div className="flex items-center">
-              {React.createElement(
-                hasActiveChildren ? item.iconSolid : item.icon,
-                {
-                  className: clsx(
-                    "mr-3 h-5 w-5 flex-shrink-0",
-                    hasActiveChildren ? "text-primary-600" : "text-gray-400"
-                  ),
-                }
-              )}
-              {item.name}
-            </div>
+            <div className="flex items-center">{item.name}</div>
             <svg
               className={clsx(
                 "h-4 w-4 transition-transform duration-200",
@@ -252,12 +184,6 @@ export default function Sidebar({ isOpen, onClose }) {
             : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
         )}
       >
-        {React.createElement(active ? item.iconSolid : item.icon, {
-          className: clsx(
-            "mr-3 h-5 w-5 flex-shrink-0",
-            active ? "text-primary-600" : "text-gray-400"
-          ),
-        })}
         {item.name}
       </Link>
     );
@@ -295,7 +221,7 @@ export default function Sidebar({ isOpen, onClose }) {
               className="lg:hidden rounded-md p-2 text-gray-400 hover:text-gray-600"
               onClick={onClose}
             >
-              <XMarkIcon className="h-6 w-6" />
+              ✕
             </button>
           </div>
 
