@@ -159,39 +159,29 @@ CREATE TABLE Payments (
 -- AUDIT TABLES FOR PROVENANCE TRACKING
 -- ====================================================================
 
--- Audit table for Trains
 CREATE TABLE Audit_Trains (
     audit_id NUMBER PRIMARY KEY,
     train_id NUMBER NOT NULL,
     operation_type VARCHAR2(10) NOT NULL CHECK (operation_type IN ('INSERT', 'UPDATE', 'DELETE')),
-    
-    -- Old values
     old_train_name VARCHAR2(100),
     old_train_type VARCHAR2(50),
     old_route_id NUMBER,
     old_total_capacity NUMBER,
     old_status VARCHAR2(20),
-    
-    -- New values
     new_train_name VARCHAR2(100),
     new_train_type VARCHAR2(50),
     new_route_id NUMBER,
     new_total_capacity NUMBER,
     new_status VARCHAR2(20),
-    
-    -- Provenance metadata
     audit_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id VARCHAR2(50) DEFAULT USER,
     change_reason VARCHAR2(500)
 );
 
--- Audit table for Schedules
 CREATE TABLE Audit_Schedules (
     audit_id NUMBER PRIMARY KEY,
     schedule_id NUMBER NOT NULL,
     operation_type VARCHAR2(10) NOT NULL CHECK (operation_type IN ('INSERT', 'UPDATE', 'DELETE')),
-    
-    -- Old values
     old_train_id NUMBER,
     old_departure_station_id NUMBER,
     old_arrival_station_id NUMBER,
@@ -200,8 +190,6 @@ CREATE TABLE Audit_Schedules (
     old_base_fare NUMBER(10,2),
     old_available_seats NUMBER,
     old_status VARCHAR2(20),
-    
-    -- New values
     new_train_id NUMBER,
     new_departure_station_id NUMBER,
     new_arrival_station_id NUMBER,
@@ -210,20 +198,15 @@ CREATE TABLE Audit_Schedules (
     new_base_fare NUMBER(10,2),
     new_available_seats NUMBER,
     new_status VARCHAR2(20),
-    
-    -- Provenance metadata
     audit_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id VARCHAR2(50) DEFAULT USER,
     change_reason VARCHAR2(500)
 );
 
--- Audit table for Passengers (Reservations)
 CREATE TABLE Audit_Passengers (
     audit_id NUMBER PRIMARY KEY,
     reservation_id NUMBER NOT NULL,
     operation_type VARCHAR2(10) NOT NULL CHECK (operation_type IN ('INSERT', 'UPDATE', 'DELETE')),
-    
-    -- Old values
     old_passenger_id NUMBER,
     old_schedule_id NUMBER,
     old_seat_number VARCHAR2(10),
@@ -233,8 +216,6 @@ CREATE TABLE Audit_Passengers (
     old_passenger_gender VARCHAR2(10),
     old_booking_status VARCHAR2(20),
     old_fare_amount NUMBER(10,2),
-    
-    -- New values
     new_passenger_id NUMBER,
     new_schedule_id NUMBER,
     new_seat_number VARCHAR2(10),
@@ -244,20 +225,15 @@ CREATE TABLE Audit_Passengers (
     new_passenger_gender VARCHAR2(10),
     new_booking_status VARCHAR2(20),
     new_fare_amount NUMBER(10,2),
-    
-    -- Provenance metadata
     audit_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id VARCHAR2(50) DEFAULT USER,
     change_reason VARCHAR2(500)
 );
 
--- Audit table for Payments
 CREATE TABLE Audit_Payments (
     audit_id NUMBER PRIMARY KEY,
     payment_id NUMBER NOT NULL,
     operation_type VARCHAR2(10) NOT NULL CHECK (operation_type IN ('INSERT', 'UPDATE', 'DELETE')),
-    
-    -- Old values
     old_reservation_id NUMBER,
     old_amount NUMBER(10,2),
     old_payment_method VARCHAR2(20),
@@ -265,8 +241,6 @@ CREATE TABLE Audit_Payments (
     old_transaction_id VARCHAR2(100),
     old_refund_amount NUMBER(10,2),
     old_refund_date TIMESTAMP,
-    
-    -- New values
     new_reservation_id NUMBER,
     new_amount NUMBER(10,2),
     new_payment_method VARCHAR2(20),
@@ -274,8 +248,6 @@ CREATE TABLE Audit_Payments (
     new_transaction_id VARCHAR2(100),
     new_refund_amount NUMBER(10,2),
     new_refund_date TIMESTAMP,
-    
-    -- Provenance metadata
     audit_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id VARCHAR2(50) DEFAULT USER,
     change_reason VARCHAR2(500)
