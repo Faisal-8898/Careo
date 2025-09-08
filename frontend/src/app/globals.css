@@ -156,7 +156,7 @@ body {
 
 /* Navigation styles */
 .nav-link {
-  @apply text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200;
+  @apply text-gray-700 hover:text-primary-600 hover:bg-gray-50 flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200;
 }
 
 .nav-link-active {
