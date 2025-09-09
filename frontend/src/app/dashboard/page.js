@@ -35,7 +35,7 @@ export default function DashboardPage() {
     'user-bookings',
     () => reservationsApi.getAll({ limit: 5 }),
     {
-      enabled: isAuthenticated && user?.userType === 'passenger',
+      enabled: Boolean(isAuthenticated && user?.userType === 'passenger'),
       select: data => data.data,
     }
   );
@@ -45,7 +45,7 @@ export default function DashboardPage() {
     'user-payments',
     () => paymentsApi.getAll({ limit: 5 }),
     {
-      enabled: isAuthenticated && user?.userType === 'passenger',
+      enabled: Boolean(isAuthenticated && user?.userType === 'passenger'),
       select: data => data.data,
     }
   );

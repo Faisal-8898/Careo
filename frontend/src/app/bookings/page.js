@@ -55,7 +55,7 @@ export default function BookingsPage() {
         limit: 10,
       }),
     {
-      enabled: isAuthenticated && user?.userType === "passenger",
+      enabled: Boolean(isAuthenticated && user?.userType === "passenger"),
       select: (data) => data.data,
     }
   );

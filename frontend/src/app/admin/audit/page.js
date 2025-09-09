@@ -19,13 +19,9 @@ import { ErrorState } from "../../../components/UI/EmptyState";
 import { auditApi } from "../../../services/api";
 import {
   DocumentTextIcon,
-  ClockIcon,
   UserIcon,
   EyeIcon,
-  CalendarIcon,
-  FunnelIcon,
   ChartBarIcon,
-  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { format, parseISO } from "date-fns";
 
@@ -52,10 +48,11 @@ export default function AdminAuditPage() {
     ["audit-summary", dateFrom, dateTo],
     () => auditApi.getSummary({ date_from: dateFrom, date_to: dateTo }),
     {
-      enabled:
+      enabled: Boolean(
         isAuthenticated &&
         user?.userType === "admin" &&
-        selectedTab === "summary",
+        selectedTab === "summary"
+      ),
       select: (data) => data.data.data,
     }
   );
@@ -98,11 +95,12 @@ export default function AdminAuditPage() {
       }
     },
     {
-      enabled:
+      enabled: Boolean(
         isAuthenticated &&
         user?.userType === "admin" &&
         selectedTab === "trails" &&
-        selectedTable,
+        selectedTable
+      ),
       select: (data) => data?.data,
     }
   );
@@ -118,11 +116,12 @@ export default function AdminAuditPage() {
         date_to: dateTo || undefined,
       }),
     {
-      enabled:
+      enabled: Boolean(
         isAuthenticated &&
         user?.userType === "admin" &&
         selectedTab === "users" &&
-        selectedUserId,
+        selectedUserId
+      ),
       select: (data) => data.data,
     }
   );
@@ -223,11 +222,10 @@ export default function AdminAuditPage() {
                 <button
                   key={tab.id}
                   onClick={() => setSelectedTab(tab.id)}
-                  className={`${
-                    selectedTab === tab.id
-                      ? "border-primary-500 text-primary-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
+                  className={`${selectedTab === tab.id
+                    ? "border-primary-500 text-primary-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{tab.name}</span>

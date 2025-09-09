@@ -41,7 +41,14 @@ async function executeQuery(sql, binds = [], options = {}) {
   let connection;
   try {
     connection = await getConnection();
-    const result = await connection.execute(sql, binds, options);
+
+    // Add timeout to prevent hanging queries
+    const queryOptions = {
+      ...options,
+      timeout: 10000 // 10 second timeout
+    };
+
+    const result = await connection.execute(sql, binds, queryOptions);
     return result;
   } catch (err) {
     console.error("Error executing query:", err);

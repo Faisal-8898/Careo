@@ -15,6 +15,13 @@ const getAllStations = async (req, res) => {
 
     const result = await db.executeQuery(sql, [offset, parseInt(limit)]);
 
+    // Add cache-busting headers
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
     res.json({
       success: true,
       data: result.rows,
@@ -222,7 +229,7 @@ const searchStations = async (req, res) => {
     }
 
     const sql = `
-      SELECT station_id, station_name, station_code, city
+      SELECT station_id, station_name, station_code, city, created_at
       FROM Stations
       WHERE UPPER(station_name) LIKE UPPER(:term)
          OR UPPER(station_code) LIKE UPPER(:term)
@@ -237,6 +244,13 @@ const searchStations = async (req, res) => {
       searchTerm,
       searchTerm,
     ]);
+
+    // Add cache-busting headers
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
 
     res.json({
       success: true,

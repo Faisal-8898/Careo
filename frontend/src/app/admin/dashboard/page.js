@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
     'admin-dashboard',
     () => adminApi.getDashboard(),
     {
-      enabled: isAuthenticated && user?.userType === 'admin',
+      enabled: Boolean(isAuthenticated && user?.userType === 'admin'),
       select: data => data.data.data,
       refetchInterval: 30000, // Refetch every 30 seconds
       staleTime: 0, // Consider data stale immediately
@@ -121,7 +121,7 @@ export default function AdminDashboardPage() {
             value={stats.totalReservations?.toLocaleString() || '0'}
             icon={() => (
               <svg className="h-6 w-6" fill="none"
-               stroke="currentColor" viewBox="0 0 24 24">
+                stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
               </svg>
             )}

@@ -192,4 +192,9 @@ WHERE payment_id = 3;
 -- Update train fare (will trigger audit)
 UPDATE Schedules SET base_fare = 900.00 WHERE schedule_id = 1;
 
+-- Add some DELETE operations to demonstrate audit trails
+-- Delete a train (will trigger audit)
+DELETE FROM Trains WHERE train_id = 4;
+
+
 COMMIT;

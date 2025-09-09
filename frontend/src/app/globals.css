@@ -9,13 +9,7 @@
   --background-end-rgb: 255, 255, 255;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
+/* Dark mode disabled to prevent form input text color issues */
 
 body {
   color: rgb(var(--foreground-rgb));
@@ -71,11 +65,44 @@ body {
 
 /* Form styles */
 .form-input {
-  @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
+  @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-gray-900 bg-white;
 }
 
 .form-label {
   @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+/* Ensure form inputs are not affected by dark mode */
+input, select, textarea {
+  color: #111827 !important; /* text-gray-900 */
+  background-color: #ffffff !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  color: #111827 !important; /* text-gray-900 */
+  background-color: #ffffff !important;
+}
+
+/* Specific fixes for form inputs */
+.form-input {
+  color: #111827 !important; /* text-gray-900 */
+  background-color: #ffffff !important;
+}
+
+.form-input:focus {
+  color: #111827 !important; /* text-gray-900 */
+  background-color: #ffffff !important;
+}
+
+/* Fix for select dropdowns */
+select.form-input {
+  color: #111827 !important; /* text-gray-900 */
+  background-color: #ffffff !important;
+}
+
+select.form-input:focus {
+  color: #111827 !important; /* text-gray-900 */
+  background-color: #ffffff !important;
 }
 
 /* Card styles */
