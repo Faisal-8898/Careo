@@ -18,7 +18,6 @@ import {
 import { NoTrains, ErrorState } from "../../../components/UI/EmptyState";
 import { trainsApi, routesApi } from "../../../services/api";
 import {
-  TrainIcon,
   PlusIcon,
   PencilIcon,
   TrashIcon,
@@ -227,7 +226,7 @@ export default function AdminTrainsPage() {
                       <td className="table-cell">
                         <div className="flex items-center">
                           <div className="h-10 w-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
-                            <TrainIcon className="h-6 w-6 text-primary-600" />
+                            <span className="text-lg font-bold text-primary-600">T</span>
                           </div>
                           <div>
                             <div className="text-sm font-medium text-gray-900">

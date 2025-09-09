@@ -5,17 +5,17 @@ oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 oracledb.autoCommit = true;
 
 const dbConfig = {
-  user: process.env.DB_USERNAME || "system",
+  user: process.env.DB_USERNAME || "trainuser",
   password: process.env.DB_PASSWORD || "secret",
-  connectString: `${process.env.DB_HOST || "localhost"}:${
-    process.env.DB_PORT || "1521"
-  }/${process.env.DB_SERVICE || "XEPDB1"}`,
+  connectString: `${process.env.DB_HOST || "localhost"}:${process.env.DB_PORT || "1521"
+    }/${process.env.DB_SERVICE || "XE"}`,
   poolMin: parseInt(process.env.DB_POOL_MIN) || 1,
   poolMax: parseInt(process.env.DB_POOL_MAX) || 10,
   poolIncrement: parseInt(process.env.DB_POOL_INCREMENT) || 1,
 };
 
 let pool;
+
 
 async function initialize() {
   try {
@@ -64,16 +64,16 @@ async function close() {
       console.log("Oracle Database connection pool closed");
     }
   } catch (err) {
-    console.error("Error closing Oracle Database connection pool:", err);
+    if (err.code !== 'NJS-065') { // Don't log if pool is already closed
+      console.error("Error closing Oracle Database connection pool:", err);
+    }
   }
 }
 
 // Initialize the connection pool
 initialize();
 
-// Graceful shutdown
-process.on("SIGINT", close);
-process.on("SIGTERM", close);
+// Note: Graceful shutdown is handled in server.js
 
 module.exports = {
   getConnection,

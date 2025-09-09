@@ -62,7 +62,7 @@ body {
 }
 
 .btn-secondary {
-  @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 focus:ring-4 focus:ring-gray-100 transition-all duration-200;
+  @apply bg-gray-100 text-gray-400 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 focus:ring-4 focus:ring-gray-100 transition-all duration-200;
 }
 
 .btn-danger {

@@ -18,13 +18,14 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      const redirectPath =
-        formData.userType === "admin" ? "/admin/dashboard" : "/dashboard";
-      router.push(redirectPath);
-    }
-  }, [isAuthenticated, router, formData.userType]);
+  // Disable automatic redirect - we'll handle it manually in handleSubmit
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     const redirectPath =
+  //       formData.userType === "admin" ? "/admin/dashboard" : "/dashboard";
+  //     router.push(redirectPath);
+  //   }
+  // }, [isAuthenticated, router, formData.userType]);
 
   useEffect(() => {
     if (error) {
@@ -35,17 +36,42 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    console.log('Form submitted, preventing default');
     setIsSubmitting(true);
 
-    const { userType, ...credentials } = formData;
-    const result = await login(credentials, userType);
+    try {
+      const { userType, ...credentials } = formData;
+      console.log('Attempting login with:', { userType, username: credentials.username });
 
-    if (result.success) {
-      toast.success("Login successful!");
-      const redirectPath =
-        userType === "admin" ? "/admin/dashboard" : "/dashboard";
-      router.push(redirectPath);
-    } else {
+      const result = await login(credentials, userType);
+      console.log('Login result:', result);
+
+      if (result.success) {
+        // Show success toast with longer duration and wait for it
+        toast.success("Login successful! Redirecting...", {
+          duration: 2000,
+        });
+
+        // Wait for toast to be visible before redirect (2 seconds)
+        setTimeout(() => {
+          const redirectPath =
+            userType === "admin" ? "/admin/dashboard" : "/dashboard";
+          router.push(redirectPath);
+        }, 2000);
+      } else {
+        // Show error toast with longer duration
+        toast.error("Login failed. Please try again.", {
+          duration: 6000,
+        });
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("An unexpected error occurred. Please try again.", {
+        duration: 6000,
+      });
       setIsSubmitting(false);
     }
   };
@@ -76,11 +102,11 @@ export default function LoginPage() {
               <div className="h-10 w-10 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">C</span>
               </div>
-              <span className="ml-3 text-2xl font-bold text-gray-900">
+              <span className="ml-3 text-2xl font-bold text-gray-100">
                 Careo
               </span>
             </Link>
-            <h2 className="mt-8 text-3xl font-bold tracking-tight text-gray-900">
+            <h2 className="mt-8 text-3xl font-bold tracking-tight text-gray-400">
               Sign in to your account
             </h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -94,22 +120,21 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 ">
             <form className="space-y-6" onSubmit={handleSubmit}>
               {/* User Type Selection */}
               <div>
-                <label className="form-label">Sign in as</label>
+                <label className="form-label ">Sign in as</label>
                 <div className="mt-2 grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() =>
                       setFormData({ ...formData, userType: "passenger" })
                     }
-                    className={`${
-                      formData.userType === "passenger"
-                        ? "bg-primary-50 border-primary-600 text-primary-600"
-                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                    } relative rounded-lg border p-4 flex flex-col items-center justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200`}
+                    className={`${formData.userType === "passenger"
+                      ? "bg-primary-50 border-primary-600 text-primary-600"
+                      : "bg-white border-gray-300 text-gray-400 hover:bg-gray-50"
+                      } relative rounded-lg border p-4 flex flex-col items-center justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200`}
                   >
                     <svg
                       className="h-8 w-8 mb-2"
@@ -131,11 +156,10 @@ export default function LoginPage() {
                     onClick={() =>
                       setFormData({ ...formData, userType: "admin" })
                     }
-                    className={`${
-                      formData.userType === "admin"
-                        ? "bg-primary-50 border-primary-600 text-primary-600"
-                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                    } relative rounded-lg border p-4 flex flex-col items-center justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200`}
+                    className={`${formData.userType === "admin"
+                      ? "bg-primary-50 border-primary-600 text-primary-600"
+                      : "bg-white border-gray-300 text-gray-400 hover:bg-gray-50"
+                      } relative rounded-lg border p-4 flex flex-col items-center justify-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200`}
                   >
                     <svg
                       className="h-8 w-8 mb-2"
@@ -167,7 +191,7 @@ export default function LoginPage() {
                     type="text"
                     autoComplete="username"
                     required
-                    className="form-input"
+                    className="form-input text-black"
                     placeholder="Enter your username"
                     value={formData.username}
                     onChange={handleChange}
@@ -187,7 +211,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
-                    className="form-input pr-10"
+                    className="form-input pr-10 text-black"
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleChange}
@@ -217,7 +241,7 @@ export default function LoginPage() {
                   />
                   <label
                     htmlFor="remember-me"
-                    className="ml-3 block text-sm text-gray-700"
+                    className="ml-3 block text-sm text-gray-300"
                   >
                     Remember me
                   </label>

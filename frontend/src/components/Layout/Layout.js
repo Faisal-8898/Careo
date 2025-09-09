@@ -16,20 +16,18 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={handleSidebarClose} />
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <Header onMenuClick={handleSidebarToggle} />
 
         {/* Page content */}
-        <main className="py-6">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+        <main className="flex-1 p-6">
+          {children}
         </main>
       </div>
     </div>

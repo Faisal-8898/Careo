@@ -35,8 +35,8 @@ export default function Header({ onMenuClick }) {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
+      <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
           {/* Left side */}
           <div className="flex items-center">
@@ -49,7 +49,7 @@ export default function Header({ onMenuClick }) {
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
             </button>
 
-            {/* Logo */}
+            {/* Logo
             <Link href="/" className="flex items-center">
               <div className="flex-shrink-0 flex items-center ml-4 lg:ml-0">
                 <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
@@ -57,7 +57,7 @@ export default function Header({ onMenuClick }) {
                 </div>
                 <span className="ml-2 text-xl font-bold text-gray-900">Careo</span>
               </div>
-            </Link>
+            </Link> */}
           </div>
 
           {/* Search bar */}

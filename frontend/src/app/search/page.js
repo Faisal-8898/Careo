@@ -12,7 +12,6 @@ import { schedulesApi, stationsApi } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   MagnifyingGlassIcon,
-  TrainIcon,
   ClockIcon,
   MapPinIcon,
   ArrowRightIcon,
@@ -59,7 +58,7 @@ export default function SearchPage() {
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
-    
+
     if (!searchForm.departure_station || !searchForm.arrival_station) {
       toast.error('Please select departure and arrival stations');
       return;
@@ -71,7 +70,7 @@ export default function SearchPage() {
     try {
       const response = await schedulesApi.search(searchForm);
       setSearchResults(response.data.data || []);
-      
+
       // Update URL with search params
       const params = new URLSearchParams(searchForm);
       router.push(`/search?${params.toString()}`);
@@ -90,7 +89,7 @@ export default function SearchPage() {
       router.push('/auth/login');
       return;
     }
-    
+
     // Navigate to booking page with schedule details
     router.push(`/book?schedule_id=${schedule.SCHEDULE_ID}`);
   };
@@ -243,7 +242,7 @@ export default function SearchPage() {
                       <div className="flex items-center space-x-6">
                         <div className="flex-shrink-0">
                           <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                            <TrainIcon className="h-7 w-7 text-primary-600" />
+                            <span className="text-xl font-bold text-primary-600">T</span>
                           </div>
                         </div>
 
@@ -265,7 +264,7 @@ export default function SearchPage() {
                               <ArrowRightIcon className="h-4 w-4" />
                               <span className="font-medium">{schedule.ARRIVAL_STATION}</span>
                             </div>
-                            
+
                             <div className="flex items-center space-x-2">
                               <ClockIcon className="h-4 w-4" />
                               <span>
@@ -309,10 +308,10 @@ export default function SearchPage() {
                         >
                           <TicketIcon className="h-5 w-5" />
                           <span>
-                            {schedule.AVAILABLE_SEATS === 0 
-                              ? 'Sold Out' 
-                              : schedule.STATUS !== 'SCHEDULED' 
-                                ? 'Not Available' 
+                            {schedule.AVAILABLE_SEATS === 0
+                              ? 'Sold Out'
+                              : schedule.STATUS !== 'SCHEDULED'
+                                ? 'Not Available'
                                 : 'Book Now'
                             }
                           </span>

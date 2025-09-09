@@ -19,7 +19,6 @@ import { NoBookings, ErrorState } from "../../components/UI/EmptyState";
 import { reservationsApi } from "../../services/api";
 import {
   TicketIcon,
-  TrainIcon,
   CalendarIcon,
   MapPinIcon,
   ArrowRightIcon,
@@ -199,7 +198,7 @@ export default function BookingsPage() {
                     {/* Booking Info */}
                     <div className="flex items-center space-x-4">
                       <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                        <TrainIcon className="h-7 w-7 text-primary-600" />
+                        <span className="text-xl font-bold text-primary-600">T</span>
                       </div>
 
                       <div className="flex-1">

@@ -1,7 +1,6 @@
-import { 
+import {
   MagnifyingGlassIcon,
   DocumentIcon,
-  TrainIcon,
   TicketIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
@@ -9,7 +8,7 @@ import {
 const icons = {
   search: MagnifyingGlassIcon,
   document: DocumentIcon,
-  train: TrainIcon,
+  train: DocumentIcon, // Use document icon as fallback for train
   ticket: TicketIcon,
   warning: ExclamationTriangleIcon,
 };

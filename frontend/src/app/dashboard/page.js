@@ -14,7 +14,6 @@ import {
   TicketIcon,
   CreditCardIcon,
   CalendarIcon,
-  TrainIcon,
   ArrowRightIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
@@ -143,7 +142,7 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-center space-x-4">
                         <div className="h-10 w-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                          <TrainIcon className="h-6 w-6 text-primary-600" />
+                          <span className="text-lg font-bold text-primary-600">T</span>
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">
@@ -160,7 +159,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {upcomingTrips.length > 3 && (
                     <button
                       onClick={() => router.push('/bookings')}
@@ -321,12 +320,12 @@ export default function DashboardPage() {
                   className="flex items-center justify-between p-4 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors duration-200"
                 >
                   <div className="flex items-center space-x-3">
-                    <TrainIcon className="h-6 w-6 text-primary-600" />
+                    <span className="text-lg font-bold text-primary-600">T</span>
                     <span className="font-medium text-primary-900">Search Trains</span>
                   </div>
                   <ArrowRightIcon className="h-4 w-4 text-primary-600" />
                 </button>
-                
+
                 <button
                   onClick={() => router.push('/bookings')}
                   className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -337,7 +336,7 @@ export default function DashboardPage() {
                   </div>
                   <ArrowRightIcon className="h-4 w-4 text-gray-600" />
                 </button>
-                
+
                 <button
                   onClick={() => router.push('/payments')}
                   className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -348,7 +347,7 @@ export default function DashboardPage() {
                   </div>
                   <ArrowRightIcon className="h-4 w-4 text-gray-600" />
                 </button>
-                
+
                 <button
                   onClick={() => router.push('/profile')}
                   className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-200"

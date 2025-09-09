@@ -58,9 +58,41 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 });
+
+// Graceful shutdown
+const gracefulShutdown = (signal) => {
+  console.log(`\n${signal} received. Shutting down gracefully...`);
+
+  server.close(() => {
+    console.log('HTTP server closed.');
+
+    // Close database connection
+    if (db && db.close) {
+      db.close().then(() => {
+        console.log('Database connection closed.');
+        process.exit(0);
+      }).catch((err) => {
+        console.error('Error closing database connection:', err);
+        process.exit(1);
+      });
+    } else {
+      process.exit(0);
+    }
+  });
+
+  // Force close after timeout
+  setTimeout(() => {
+    console.error('Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 5000);
+};
+
+// Handle shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 module.exports = app;

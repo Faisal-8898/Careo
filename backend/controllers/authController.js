@@ -48,7 +48,7 @@ const registerPassenger = async (req, res) => {
       WHERE username = :username OR email = :email
     `;
     const checkResult = await db.executeQuery(checkUserSql, [username, email]);
-    
+
     if (checkResult.rows[0].COUNT > 0) {
       return res.status(409).json({
         success: false,
@@ -291,7 +291,7 @@ const createAdmin = async (req, res) => {
       WHERE username = :username OR email = :email
     `;
     const checkResult = await db.executeQuery(checkUserSql, [username, email]);
-    
+
     if (checkResult.rows[0].COUNT > 0) {
       return res.status(409).json({
         success: false,
@@ -402,7 +402,7 @@ const updateProfile = async (req, res) => {
 
     if (userType === 'passenger') {
       const allowedFields = ['email', 'full_name', 'phone', 'date_of_birth', 'gender'];
-      const fieldsToUpdate = Object.keys(updateFields).filter(field => 
+      const fieldsToUpdate = Object.keys(updateFields).filter(field =>
         allowedFields.includes(field)
       );
 
@@ -434,7 +434,7 @@ const updateProfile = async (req, res) => {
       await db.executeQuery(sql, binds);
     } else {
       const allowedFields = ['email', 'full_name', 'employee_id'];
-      const fieldsToUpdate = Object.keys(updateFields).filter(field => 
+      const fieldsToUpdate = Object.keys(updateFields).filter(field =>
         allowedFields.includes(field)
       );
 
@@ -490,7 +490,7 @@ const changePassword = async (req, res) => {
     }
 
     // Get current password hash
-    let sql = userType === 'passenger' 
+    let sql = userType === 'passenger'
       ? `SELECT password_hash FROM Passengers WHERE passenger_id = :userId`
       : `SELECT password_hash FROM Admins WHERE admin_id = :userId`;
 

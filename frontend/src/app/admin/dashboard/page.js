@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import Layout from '../../../components/Layout/Layout';
 import Card, { StatsCard, CardHeader, CardTitle, CardContent, CardFooter } from '../../../components/UI/Card';
 import Badge, { BookingStatusBadge, PaymentStatusBadge, TrainStatusBadge } from '../../../components/UI/Badge';
@@ -11,20 +11,20 @@ import { FullPageSpinner } from '../../../components/UI/LoadingSpinner';
 import { adminApi } from '../../../services/api';
 import {
   UsersIcon,
-  TrainIcon,
-  TicketIcon,
   CreditCardIcon,
   ChartBarIcon,
   ClockIcon,
   ExclamationTriangleIcon,
   ArrowTrendingUpIcon,
   ArrowRightIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns';
 
 export default function AdminDashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Redirect if not authenticated or not an admin
   useEffect(() => {
@@ -34,15 +34,23 @@ export default function AdminDashboardPage() {
   }, [isAuthenticated, user, isLoading, router]);
 
   // Fetch dashboard data
-  const { data: dashboardData, isLoading: dashboardLoading } = useQuery(
+  const { data: dashboardData, isLoading: dashboardLoading, refetch } = useQuery(
     'admin-dashboard',
     () => adminApi.getDashboard(),
     {
       enabled: isAuthenticated && user?.userType === 'admin',
       select: data => data.data.data,
       refetchInterval: 30000, // Refetch every 30 seconds
+      staleTime: 0, // Consider data stale immediately
+      cacheTime: 0, // Don't cache data
     }
   );
+
+  // Manual refresh function
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries('admin-dashboard');
+    refetch();
+  };
 
   if (isLoading || dashboardLoading) {
     return <FullPageSpinner message="Loading admin dashboard..." />;
@@ -69,12 +77,22 @@ export default function AdminDashboardPage() {
                   Monitor and manage the train ticket management system
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-primary-200 text-sm">Welcome back,</p>
-                <p className="text-xl font-semibold">{user?.full_name}</p>
-                <Badge variant="info" className="mt-1 bg-white/20 text-white border-white/30">
-                  {user?.role || 'Admin'}
-                </Badge>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={handleRefresh}
+                  disabled={dashboardLoading}
+                  className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg border border-white/30 transition-colors duration-200"
+                >
+                  <ArrowPathIcon className={`h-4 w-4 ${dashboardLoading ? 'animate-spin' : ''}`} />
+                  <span className="text-sm font-medium">Refresh</span>
+                </button>
+                <div className="text-right">
+                  <p className="text-primary-200 text-sm">Welcome back,</p>
+                  <p className="text-xl font-semibold">{user?.full_name}</p>
+                  <Badge variant="info" className="mt-1 bg-white/20 text-white border-white/30">
+                    {user?.role || 'Admin'}
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
@@ -92,12 +110,21 @@ export default function AdminDashboardPage() {
           <StatsCard
             title="Active Trains"
             value={stats.totalTrains?.toLocaleString() || '0'}
-            icon={TrainIcon}
+            icon={() => (
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            )}
           />
           <StatsCard
             title="Total Reservations"
             value={stats.totalReservations?.toLocaleString() || '0'}
-            icon={TicketIcon}
+            icon={() => (
+              <svg className="h-6 w-6" fill="none"
+               stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+              </svg>
+            )}
             change="+8%"
             changeType="positive"
           />
@@ -116,7 +143,9 @@ export default function AdminDashboardPage() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <TicketIcon className="h-6 w-6 text-blue-600" />
+                  <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
                 </div>
               </div>
               <div className="ml-4">
@@ -203,7 +232,9 @@ export default function AdminDashboardPage() {
                     >
                       <div className="flex items-center space-x-3">
                         <div className="h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                          <TicketIcon className="h-4 w-4 text-primary-600" />
+                          <svg className="h-4 w-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                          </svg>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
@@ -225,7 +256,9 @@ export default function AdminDashboardPage() {
                 </div>
               ) : (
                 <div className="text-center py-6">
-                  <TicketIcon className="mx-auto h-12 w-12 text-gray-300" />
+                  <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
                   <p className="mt-2 text-sm text-gray-600">No recent bookings</p>
                 </div>
               )}
@@ -293,12 +326,14 @@ export default function AdminDashboardPage() {
                   className="flex items-center justify-between p-4 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors duration-200"
                 >
                   <div className="flex items-center space-x-3">
-                    <TrainIcon className="h-6 w-6 text-primary-600" />
+                    <svg className="h-6 w-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
                     <span className="font-medium text-primary-900">Manage Trains</span>
                   </div>
                   <ArrowRightIcon className="h-4 w-4 text-primary-600" />
                 </button>
-                
+
                 <button
                   onClick={() => router.push('/admin/schedules')}
                   className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -309,7 +344,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <ArrowRightIcon className="h-4 w-4 text-gray-600" />
                 </button>
-                
+
                 <button
                   onClick={() => router.push('/admin/users')}
                   className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -320,7 +355,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <ArrowRightIcon className="h-4 w-4 text-gray-600" />
                 </button>
-                
+
                 <button
                   onClick={() => router.push('/admin/audit')}
                   className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -351,7 +386,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <span className="text-xs text-green-700">Operational</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center space-x-3">
                     <div className="h-3 w-3 bg-green-500 rounded-full"></div>
@@ -359,7 +394,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <span className="text-xs text-green-700">All Good</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center space-x-3">
                     <div className="h-3 w-3 bg-green-500 rounded-full"></div>
@@ -367,7 +402,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <span className="text-xs text-green-700">Connected</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                   <div className="flex items-center space-x-3">
                     <div className="h-3 w-3 bg-yellow-500 rounded-full"></div>
