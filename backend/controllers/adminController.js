@@ -367,6 +367,176 @@ const getTrainReports = async (req, res) => {
   }
 };
 
+// WHAT Provenance: Revenue Source Lineage
+const getRevenueSourceLineage = async (req, res) => {
+  try {
+    const { date_from, date_to, route_id } = req.query;
+
+    let dateClause = '';
+    let routeClause = '';
+    let binds = [];
+
+    if (date_from && date_to) {
+      dateClause = `AND p.payment_date >= TO_DATE(:date_from, 'YYYY-MM-DD')
+                      AND p.payment_date <= TO_DATE(:date_to, 'YYYY-MM-DD') + 1`;
+      binds.push(date_from, date_to);
+    }
+
+    if (route_id) {
+      routeClause = `AND r.route_id = :route_id`;
+      binds.push(route_id);
+    }
+
+    const sql = `
+      SELECT p.payment_id, p.amount, p.payment_status, p.payment_date,
+             res.reservation_id, res.booking_reference, res.passenger_name,
+             s.schedule_id, s.departure_time, s.arrival_time,
+             t.train_name, t.train_type,
+             r.route_name, r.route_code,
+             ds.station_name as departure_station,
+             as_tbl.station_name as arrival_station
+      FROM Payments p
+      JOIN Reservations res ON p.reservation_id = res.reservation_id
+      JOIN Schedules s ON res.schedule_id = s.schedule_id
+      JOIN Trains t ON s.train_id = t.train_id
+      JOIN Routes r ON t.route_id = r.route_id
+      JOIN Stations ds ON s.departure_station_id = ds.station_id
+      JOIN Stations as_tbl ON s.arrival_station_id = as_tbl.station_id
+      WHERE p.payment_status = 'COMPLETED'
+        ${dateClause}
+        ${routeClause}
+      ORDER BY p.payment_date DESC
+    `;
+
+    const result = await db.executeQuery(sql, binds);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      count: result.rows.length,
+      provenance_type: 'WHAT - Shows source data that contributed to revenue calculations'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch revenue source lineage',
+      details: error.message
+    });
+  }
+};
+
+// WHAT Provenance: Train Utilization Source
+const getTrainUtilizationSource = async (req, res) => {
+  try {
+    const { train_id, date_from, date_to } = req.query;
+
+    if (!train_id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Train ID is required'
+      });
+    }
+
+    let dateClause = '';
+    let binds = [train_id];
+
+    if (date_from && date_to) {
+      dateClause = `AND s.departure_time >= TO_DATE(:date_from, 'YYYY-MM-DD')
+                      AND s.departure_time <= TO_DATE(:date_to, 'YYYY-MM-DD') + 1`;
+      binds.push(date_from, date_to);
+    }
+
+    const sql = `
+      SELECT s.schedule_id, s.departure_time, s.arrival_time, s.available_seats,
+             COUNT(res.reservation_id) as bookings_count,
+             COUNT(CASE WHEN res.booking_status = 'CONFIRMED' THEN 1 END) as confirmed_bookings,
+             ROUND(
+               (COUNT(CASE WHEN res.booking_status = 'CONFIRMED' THEN 1 END) * 100.0) / 
+               GREATEST(s.available_seats, 1), 2
+             ) as utilization_percentage,
+             ds.station_name as departure_station,
+             as_tbl.station_name as arrival_station
+      FROM Schedules s
+      JOIN Trains t ON s.train_id = t.train_id
+      LEFT JOIN Reservations res ON s.schedule_id = res.schedule_id
+      JOIN Stations ds ON s.departure_station_id = ds.station_id
+      JOIN Stations as_tbl ON s.arrival_station_id = as_tbl.station_id
+      WHERE t.train_id = :train_id
+        ${dateClause}
+      GROUP BY s.schedule_id, s.departure_time, s.arrival_time, s.available_seats,
+               ds.station_name, as_tbl.station_name
+      ORDER BY s.departure_time
+    `;
+
+    const result = await db.executeQuery(sql, binds);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      count: result.rows.length,
+      provenance_type: 'WHAT - Shows source schedules and bookings that contributed to train utilization'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch train utilization source',
+      details: error.message
+    });
+  }
+};
+
+// WHAT Provenance: Popular Route Derivation
+const getPopularRouteDerivation = async (req, res) => {
+  try {
+    const { date_from, date_to, limit = 10 } = req.query;
+
+    let dateClause = '';
+    let binds = [];
+
+    if (date_from && date_to) {
+      dateClause = `AND res.booking_date >= TO_DATE(:date_from, 'YYYY-MM-DD')
+                      AND res.booking_date <= TO_DATE(:date_to, 'YYYY-MM-DD') + 1`;
+      binds.push(date_from, date_to);
+    }
+
+    const sql = `
+      SELECT r.route_id, r.route_name, r.route_code,
+             COUNT(res.reservation_id) as total_bookings,
+             COUNT(CASE WHEN res.booking_status = 'CONFIRMED' THEN 1 END) as confirmed_bookings,
+             COUNT(DISTINCT res.passenger_id) as unique_passengers,
+             SUM(CASE WHEN res.booking_status = 'CONFIRMED' THEN res.fare_amount ELSE 0 END) as total_revenue,
+             ds.station_name as departure_station,
+             as_tbl.station_name as arrival_station
+      FROM Routes r
+      JOIN Trains t ON r.route_id = t.route_id
+      JOIN Schedules s ON t.train_id = s.train_id
+      LEFT JOIN Reservations res ON s.schedule_id = res.schedule_id
+      JOIN Stations ds ON s.departure_station_id = ds.station_id
+      JOIN Stations as_tbl ON s.arrival_station_id = as_tbl.station_id
+      WHERE 1=1
+        ${dateClause}
+      GROUP BY r.route_id, r.route_name, r.route_code, ds.station_name, as_tbl.station_name
+      ORDER BY confirmed_bookings DESC, total_revenue DESC
+      FETCH FIRST ${parseInt(limit)} ROWS ONLY
+    `;
+
+    const result = await db.executeQuery(sql, binds);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      count: result.rows.length,
+      provenance_type: 'WHAT - Shows source bookings and data that made routes popular'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch popular route derivation',
+      details: error.message
+    });
+  }
+};
+
 module.exports = {
   getDashboard,
   getAllUsers,
@@ -374,5 +544,8 @@ module.exports = {
   updateUserStatus,
   getBookingReports,
   getRevenueReports,
-  getTrainReports
+  getTrainReports,
+  getRevenueSourceLineage,
+  getTrainUtilizationSource,
+  getPopularRouteDerivation
 };

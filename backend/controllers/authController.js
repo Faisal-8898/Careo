@@ -8,8 +8,8 @@ const passengerRegisterSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
   full_name: Joi.string().min(2).max(100).required(),
-  phone: Joi.string().pattern(/^[0-9]{10,15}$/).optional(),
-  date_of_birth: Joi.date().optional(),
+  phone: Joi.string().min(0).max(20).allow('').optional(),
+  date_of_birth: Joi.date().allow('').optional(),
   gender: Joi.string().valid('MALE', 'FEMALE', 'OTHER').optional()
 });
 
@@ -64,8 +64,7 @@ const registerPassenger = async (req, res) => {
       INSERT INTO Passengers (
         passenger_id, username, email, password_hash, full_name, phone, date_of_birth, gender
       ) VALUES (
-        passenger_seq.NEXTVAL, :username, :email, :password_hash, :full_name, :phone, 
-        TO_DATE(:date_of_birth, 'YYYY-MM-DD'), :gender
+        passenger_seq.NEXTVAL, :username, :email, :password_hash, :full_name, :phone, :date_of_birth, :gender
       ) RETURNING passenger_id INTO :passenger_id
     `;
 
@@ -75,7 +74,7 @@ const registerPassenger = async (req, res) => {
       password_hash: passwordHash,
       full_name,
       phone: phone || null,
-      date_of_birth: date_of_birth || null,
+      date_of_birth: date_of_birth && date_of_birth !== '' ? new Date(date_of_birth) : null,
       gender: gender || null,
       passenger_id: { dir: db.BIND_OUT, type: db.NUMBER }
     };

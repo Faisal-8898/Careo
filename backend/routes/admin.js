@@ -26,4 +26,14 @@ router.get("/reports/revenue", adminController.getRevenueReports);
 // GET /api/admin/reports/trains - Get train utilization reports
 router.get("/reports/trains", adminController.getTrainReports);
 
+// WHAT Provenance Routes
+// GET /api/admin/provenance/revenue-source - Get revenue source lineage
+router.get("/provenance/revenue-source", adminController.getRevenueSourceLineage);
+
+// GET /api/admin/provenance/train-utilization - Get train utilization source
+router.get("/provenance/train-utilization", adminController.getTrainUtilizationSource);
+
+// GET /api/admin/provenance/popular-routes - Get popular route derivation
+router.get("/provenance/popular-routes", adminController.getPopularRouteDerivation);
+
 module.exports = router;

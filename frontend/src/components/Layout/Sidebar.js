@@ -94,6 +94,10 @@ export default function Sidebar({ isOpen, onClose }) {
       ],
     },
     {
+      name: "Data Lineage",
+      href: "/admin/lineage",
+    },
+    {
       name: "Audit Trail",
       href: "/admin/audit",
     },

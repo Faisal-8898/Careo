@@ -143,6 +143,13 @@ export const adminApi = {
     api.get("/admin/reports/revenue", { params }),
   getTrainReports: (params = {}) =>
     api.get("/admin/reports/trains", { params }),
+  // Data Lineage API
+  getRevenueSourceLineage: (params = {}) =>
+    api.get("/admin/provenance/revenue-source", { params }),
+  getTrainUtilizationSource: (params = {}) =>
+    api.get("/admin/provenance/train-utilization", { params }),
+  getPopularRouteDerivation: (params = {}) =>
+    api.get("/admin/provenance/popular-routes", { params }),
 };
 
 // Audit API - matches backend audit controller structure
