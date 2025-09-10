@@ -6,14 +6,8 @@ const getAllStations = async (req, res) => {
     const { page = 1, limit = 50 } = req.query;
     const offset = (page - 1) * limit;
 
-    const sql = `
-      SELECT station_id, station_name, station_code, city, created_at
-      FROM Stations
-      ORDER BY station_name
-      OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
-    `;
-
-    const result = await db.executeQuery(sql, [offset, parseInt(limit)]);
+    // Use stored procedure instead of direct query
+    const result = await db.executeGetAllStations(offset, parseInt(limit));
 
     // Add cache-busting headers
     res.set({
@@ -45,13 +39,8 @@ const getStationById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const sql = `
-      SELECT station_id, station_name, station_code, city, created_at
-      FROM Stations
-      WHERE station_id = :id
-    `;
-
-    const result = await db.executeQuery(sql, [id]);
+    // Use stored procedure instead of direct query
+    const result = await db.executeGetStationById(id);
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -228,22 +217,9 @@ const searchStations = async (req, res) => {
       });
     }
 
-    const sql = `
-      SELECT station_id, station_name, station_code, city, created_at
-      FROM Stations
-      WHERE UPPER(station_name) LIKE UPPER(:term)
-         OR UPPER(station_code) LIKE UPPER(:term)
-         OR UPPER(city) LIKE UPPER(:term)
-      ORDER BY station_name
-      FETCH FIRST 20 ROWS ONLY
-    `;
-
+    // Use stored procedure instead of direct query
     const searchTerm = `%${term}%`;
-    const result = await db.executeQuery(sql, [
-      searchTerm,
-      searchTerm,
-      searchTerm,
-    ]);
+    const result = await db.executeSearchStations(searchTerm);
 
     // Add cache-busting headers
     res.set({

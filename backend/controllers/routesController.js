@@ -6,17 +6,8 @@ const getAllRoutes = async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
-    const sql = `
-      SELECT r.route_id, r.route_name, r.route_code, r.created_at,
-             COUNT(rs.station_id) as station_count
-      FROM Routes r
-      LEFT JOIN Route_Stations rs ON r.route_id = rs.route_id
-      GROUP BY r.route_id, r.route_name, r.route_code, r.created_at
-      ORDER BY r.route_name
-      OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
-    `;
-
-    const result = await db.executeQuery(sql, [offset, parseInt(limit)]);
+    // Use stored procedure instead of direct query
+    const result = await db.executeGetAllRoutes(offset, parseInt(limit));
 
     // Add cache-busting headers
     res.set({
@@ -48,36 +39,18 @@ const getRouteById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Get route info
-    const routeSql = `
-      SELECT route_id, route_name, route_code, created_at
-      FROM Routes
-      WHERE route_id = :id
-    `;
+    // Use stored procedure instead of direct queries
+    const result = await db.executeGetRouteById(id);
 
-    const routeResult = await db.executeQuery(routeSql, [id]);
-
-    if (routeResult.rows.length === 0) {
+    if (result.routeRows.length === 0) {
       return res.status(404).json({
         success: false,
         error: 'Route not found'
       });
     }
 
-    // Get stations in route
-    const stationsSql = `
-      SELECT rs.stop_sequence, rs.distance_km,
-             s.station_id, s.station_name, s.station_code, s.city
-      FROM Route_Stations rs
-      JOIN Stations s ON rs.station_id = s.station_id
-      WHERE rs.route_id = :id
-      ORDER BY rs.stop_sequence
-    `;
-
-    const stationsResult = await db.executeQuery(stationsSql, [id]);
-
-    const route = routeResult.rows[0];
-    route.stations = stationsResult.rows;
+    const route = result.routeRows[0];
+    route.stations = result.stationsRows;
 
     res.json({
       success: true,
@@ -330,16 +303,8 @@ const getRouteStations = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const sql = `
-      SELECT rs.stop_sequence, rs.distance_km,
-             s.station_id, s.station_name, s.station_code, s.city
-      FROM Route_Stations rs
-      JOIN Stations s ON rs.station_id = s.station_id
-      WHERE rs.route_id = :route_id
-      ORDER BY rs.stop_sequence
-    `;
-
-    const result = await db.executeQuery(sql, [id]);
+    // Use stored procedure instead of direct query
+    const result = await db.executeGetRouteStations(id);
 
     // Add cache-busting headers
     res.set({
